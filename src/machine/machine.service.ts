@@ -4,11 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UpdateMachineDto } from './dto/update-machine.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Machine } from './entities/machine.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { FarmService } from 'src/farm/farm.service';
 import { ProcessingService } from 'src/processing/processing.service';
+import { GrowingPeriod } from 'src/growing-period/entities/growing-period.entity';
 
 @Injectable()
 export class MachineService {
@@ -17,7 +18,46 @@ export class MachineService {
     private readonly machineRepository: Repository<Machine>,
     private readonly farmService: FarmService,
     private readonly processingService: ProcessingService,
+    @InjectEntityManager() private readonly entityManager: EntityManager,
   ) {}
+
+  async findAll() {
+    return await this.machineRepository.find();
+  }
+  async findAllByCondition(condition: any) {
+    if (!condition) return null;
+    const fields = await this.machineRepository.find({
+      where: condition,
+    });
+    return fields;
+  }
+
+  async findAllByGrowingPeriod(growingPeriodId: string) {
+    if (!growingPeriodId) return null;
+    const growingPeriodFarmId = await this.entityManager
+      .getRepository(GrowingPeriod)
+      .createQueryBuilder('gp')
+      .innerJoin('field', 'f', 'f.id = gp.fieldId')
+      .where('gp.id = :growingPeriodId', { growingPeriodId })
+      .select('f.farmId', 'farmId')
+      .getRawOne();
+    const farmId = growingPeriodFarmId.farmId;
+    console.log(farmId);
+
+    const machines = this.findAllByCondition({ farmId });
+    return machines;
+  }
+
+  async findOne(id: string) {
+    if (!id) {
+      return null;
+    }
+    const machine = await this.machineRepository.findOne({
+      where: { id },
+    });
+    return machine;
+  }
+
   async create(
     brand: string,
     model: string,
@@ -81,28 +121,6 @@ export class MachineService {
     }
     Object.assign(machine, farmId);
     return await this.machineRepository.save(machine);
-  }
-
-  async findAll() {
-    return await this.machineRepository.find();
-  }
-  async findAllByCondition(condition: any) {
-    if (!condition) return null;
-    const fields = await this.machineRepository.find({
-      where: condition,
-    });
-    return fields;
-  }
-
-  async findOne(id: string, options?: { relations?: string[] }) {
-    if (!id) {
-      return null;
-    }
-    const machine = await this.machineRepository.findOne({
-      where: { id },
-      relations: options?.relations,
-    });
-    return machine;
   }
 
   async removePermanent(id: string) {

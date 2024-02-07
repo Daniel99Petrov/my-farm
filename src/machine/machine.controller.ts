@@ -35,6 +35,14 @@ export class MachineController {
   async findAllByFarm(@Param('farmId') farmId: string): Promise<Machine[]> {
     return this.machineService.findAllByCondition({ farmId });
   }
+  @Get('by-growing-period/:growingPeriodId')
+  async findAllByGrowingPeriod(
+    @Param('growingPeriodId') growingPeriodId: string,
+  ): Promise<Machine[]> {
+    const machines =
+      this.machineService.findAllByGrowingPeriod(growingPeriodId);
+    return machines;
+  }
 
   @Roles(UserRoles.OWNER, UserRoles.OPERATOR)
   @Post()

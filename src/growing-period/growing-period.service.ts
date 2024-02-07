@@ -10,8 +10,6 @@ import { CreateGrowingPeriodDto } from './dto/create-growing-period.dto';
 import { ProcessingService } from 'src/processing/processing.service';
 import { Machine } from 'src/machine/entities/machine.entity';
 import { Field } from 'src/field/entities/field.entity';
-// import { FieldService } from 'src/field/field.service';
-// import { CropService } from 'src/crop/crop.service';
 
 @Injectable()
 export class GrowingPeriodService {
@@ -74,15 +72,9 @@ export class GrowingPeriodService {
     const createdPeriod =
       await this.growingPeriodRepository.save(growingPeriod);
     const { id, created, updated, deleted } = createdPeriod;
-    console.log({ id, processingTypeId, machineId, date, fieldId });
 
-    const createdProcessing = await this.processingService.create(
-      id,
-      processingTypeId,
-      machineId,
-      date,
-    );
-    console.log(createdProcessing);
+    await this.processingService.create(id, processingTypeId, machineId, date);
+
     return { id, cropId, fieldId, created, updated, deleted };
   }
 
