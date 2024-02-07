@@ -36,6 +36,10 @@ export class FieldService {
     });
     return fields;
   }
+  async findAllByFarm(farmId: string) {
+    const fields = this.findAllByCondition({ farmId });
+    return fields;
+  }
 
   async create(
     name: string,

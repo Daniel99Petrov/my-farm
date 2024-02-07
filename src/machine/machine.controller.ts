@@ -15,6 +15,7 @@ import { UpdateMachineDto } from './dto/update-machine.dto';
 import { UserRoles } from 'src/user/user-role.enum';
 import { Roles } from 'src/user/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
+import { Machine } from './entities/machine.entity';
 
 @Controller('machine')
 @UseGuards(RolesGuard)
@@ -30,17 +31,21 @@ export class MachineController {
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return await this.machineService.findOne(id);
   }
+  @Get('by-farm/:farmId')
+  async findAllByFarm(@Param('farmId') farmId: string): Promise<Machine[]> {
+    return this.machineService.findAllByCondition({ farmId });
+  }
 
   @Roles(UserRoles.OWNER, UserRoles.OPERATOR)
   @Post()
-  async createFarm(@Body() createMachineDto: CreateMachineDto) {
-    const createdGrowingPeriod = await this.machineService.create(
+  async create(@Body() createMachineDto: CreateMachineDto) {
+    const createdMachine = await this.machineService.create(
       createMachineDto.brand,
       createMachineDto.model,
       createMachineDto.registrationNumber,
       createMachineDto.farmId,
     );
-    return { success: true, data: createdGrowingPeriod };
+    return createdMachine;
   }
   @Roles(UserRoles.OWNER, UserRoles.OPERATOR)
   @Patch(':id')

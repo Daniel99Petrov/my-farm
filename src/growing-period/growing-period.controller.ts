@@ -13,6 +13,7 @@ import { CreateGrowingPeriodDto } from './dto/create-growing-period.dto';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { UserRoles } from 'src/user/user-role.enum';
 import { Roles } from 'src/user/roles.decorator';
+import { GrowingPeriod } from './entities/growing-period.entity';
 
 @Controller('growing-period')
 @UseGuards(RolesGuard)
@@ -28,14 +29,22 @@ export class GrowingPeriodController {
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return await this.growingPeriodService.findOne(id);
   }
+  @Get('by-field/:fieldId')
+  async findAllByField(
+    @Param('fieldId') fieldId: string,
+  ): Promise<GrowingPeriod[]> {
+    const growingPeriods = this.growingPeriodService.findAllByCondition({
+      fieldId,
+    });
+    return growingPeriods;
+  }
   @Roles(UserRoles.OWNER, UserRoles.OPERATOR)
   @Post()
-  async createFarm(@Body() createGrowingPeriodDto: CreateGrowingPeriodDto) {
+  async create(@Body() createGrowingPeriodDto: CreateGrowingPeriodDto) {
     const createdGrowingPeriod = await this.growingPeriodService.create(
-      createGrowingPeriodDto.cropId,
-      createGrowingPeriodDto.fieldId,
+      createGrowingPeriodDto,
     );
-    return { success: true, data: createdGrowingPeriod };
+    return createdGrowingPeriod;
   }
 
   @Roles(UserRoles.OWNER)

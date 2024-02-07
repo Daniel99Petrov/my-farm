@@ -38,7 +38,7 @@ export class FarmController {
       createFarmDto.latitude,
       createFarmDto.longitude,
     );
-    return { success: true, data: createdFarm };
+    return createdFarm;
   }
 
   @Roles(UserRoles.OWNER, UserRoles.OPERATOR)

@@ -13,6 +13,7 @@ import { CreateProcessingDto } from './dto/create-processing.dto';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { Roles } from 'src/user/roles.decorator';
 import { UserRoles } from 'src/user/user-role.enum';
+import { Processing } from './entities/processing.entity';
 
 @Controller('processing')
 @UseGuards(RolesGuard)
@@ -28,16 +29,24 @@ export class ProcessingController {
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return await this.processingService.findOne(id);
   }
+
+  @Get('by-growing-period/:growingPeriodId')
+  async findAllByGrowingPeriod(
+    @Param('growingPeriodId') growingPeriodId: string,
+  ): Promise<Processing[]> {
+    return this.processingService.findAllByCondition({ growingPeriodId });
+  }
+
   @Roles(UserRoles.OWNER, UserRoles.OPERATOR)
   @Post()
-  async createFarm(@Body() createProcessingDto: CreateProcessingDto) {
+  async create(@Body() createProcessingDto: CreateProcessingDto) {
     const createdProcessing = await this.processingService.create(
       createProcessingDto.growingPeriodId,
       createProcessingDto.processingTypeId,
       createProcessingDto.machineId,
       createProcessingDto.date,
     );
-    return { success: true, data: createdProcessing };
+    return { createdProcessing };
   }
 
   @Roles(UserRoles.OWNER)

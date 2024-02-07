@@ -15,6 +15,7 @@ import { RolesGuard } from 'src/guards/roles.guard';
 import { UserRoles } from 'src/user/user-role.enum';
 import { Roles } from 'src/user/roles.decorator';
 import { UpdateFieldDto } from './dto/update-field.dto';
+import { Field } from './entities/field.entity';
 
 @Controller('field')
 @UseGuards(RolesGuard)
@@ -30,6 +31,10 @@ export class FieldController {
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return await this.fieldService.findOne(id);
   }
+  @Get('by-farm/:farmId')
+  async findAllByFarm(@Param('farmId') farmId: string): Promise<Field[]> {
+    return this.fieldService.findAllByCondition({ farmId });
+  }
   @Roles(UserRoles.OWNER, UserRoles.OPERATOR)
   @Post()
   async createFarm(@Body() createFieldDto: CreateFieldDto) {
@@ -39,7 +44,7 @@ export class FieldController {
       createFieldDto.farmId,
       createFieldDto.soilId,
     );
-    return { success: true, data: createdField };
+    return createdField;
   }
 
   @Roles(UserRoles.OWNER, UserRoles.OPERATOR)

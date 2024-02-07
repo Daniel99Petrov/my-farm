@@ -1,9 +1,7 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
-  forwardRef,
 } from '@nestjs/common';
 import { UpdateMachineDto } from './dto/update-machine.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,7 +16,7 @@ export class MachineService {
     @InjectRepository(Machine)
     private readonly machineRepository: Repository<Machine>,
     private readonly farmService: FarmService,
-    // private readonly processingService: ProcessingService,
+    private readonly processingService: ProcessingService,
   ) {}
   async create(
     brand: string,
@@ -57,7 +55,8 @@ export class MachineService {
     }
 
     Object.assign(machine, updateMachineDto);
-    return this.machineRepository.save(machine);
+    const updated = await this.machineRepository.save(machine);
+    return updated.id;
   }
   async transfer(machineId: string, fromFarmId: string, farmId: string) {
     const fromFarm = await this.farmService.findOne(fromFarmId);
@@ -72,20 +71,27 @@ export class MachineService {
         `Machine with id ${machineId} is not in farm ${fromFarmId}`,
       );
     }
-    // const processings = await this.processingService.findAllByCondition({
-    //   machineId: machineId,
-    // });
-    // if (processings.length > 0) {
-    //   throw new BadRequestException(
-    //     'You have processings with this machine in current farm. Delete the processings or just create new machine',
-    //   );
-    // }
+    const processings = await this.processingService.findAllByCondition({
+      machineId: machineId,
+    });
+    if (processings.length > 0) {
+      throw new BadRequestException(
+        'You have processings with this machine in current farm. Delete the processings or just create new machine',
+      );
+    }
     Object.assign(machine, farmId);
     return await this.machineRepository.save(machine);
   }
 
   async findAll() {
     return await this.machineRepository.find();
+  }
+  async findAllByCondition(condition: any) {
+    if (!condition) return null;
+    const fields = await this.machineRepository.find({
+      where: condition,
+    });
+    return fields;
   }
 
   async findOne(id: string, options?: { relations?: string[] }) {

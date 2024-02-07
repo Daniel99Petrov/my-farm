@@ -1,7 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { GrowingPeriod } from './entities/growing-period.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
+import { CreateGrowingPeriodDto } from './dto/create-growing-period.dto';
+import { ProcessingService } from 'src/processing/processing.service';
+import { Machine } from 'src/machine/entities/machine.entity';
+import { Field } from 'src/field/entities/field.entity';
 // import { FieldService } from 'src/field/field.service';
 // import { CropService } from 'src/crop/crop.service';
 
@@ -10,8 +18,8 @@ export class GrowingPeriodService {
   constructor(
     @InjectRepository(GrowingPeriod)
     private readonly growingPeriodRepository: Repository<GrowingPeriod>,
-    // private readonly cropService: CropService,
-    // private readonly fieldService: FieldService,
+    private readonly processingService: ProcessingService,
+    @InjectEntityManager() private readonly entityManager: EntityManager,
   ) {}
   async findAll() {
     return await this.growingPeriodRepository.find();
@@ -30,20 +38,35 @@ export class GrowingPeriodService {
     if (!condition) return null;
     const growingPeriods = await this.growingPeriodRepository.find({
       where: condition,
+      order: {
+        created: 'DESC',
+      },
     });
     return growingPeriods;
   }
 
-  async create(cropId: string, fieldId: string) {
-    // const crop = await this.cropService.findOne(cropId);
-    // if (!crop) {
-    //   throw new BadRequestException(`There is no crop with id ${cropId}`);
-    // }
-    // const field = await this.fieldService.findOne(fieldId);
-    // if (!field) {
-    //   throw new BadRequestException(`There is no field with id ${fieldId}`);
-    // }
+  async create(createGrowingPeriodDto: CreateGrowingPeriodDto) {
+    const { cropId, fieldId, processingTypeId, machineId, date } =
+      createGrowingPeriodDto;
 
+    const machineFarmId = await this.entityManager
+      .getRepository(Machine)
+      .createQueryBuilder('machine')
+      .where('machine.id = :machineId', { machineId })
+      .select('machine.farmId', 'farmId')
+      .getRawOne();
+
+    const fieldFarmId = await this.entityManager
+      .getRepository(Field)
+      .createQueryBuilder('field')
+      .where('field.id = :fieldId', { fieldId })
+      .select('field.farmId', 'farmId')
+      .getRawOne();
+    if (machineFarmId.farmId !== fieldFarmId.farmId) {
+      throw new BadRequestException(
+        `Machine with id ${machineId} is not in this farm. Please select another machine`,
+      );
+    }
     const growingPeriod = this.growingPeriodRepository.create({
       cropId,
       fieldId,
@@ -51,6 +74,15 @@ export class GrowingPeriodService {
     const createdPeriod =
       await this.growingPeriodRepository.save(growingPeriod);
     const { id, created, updated, deleted } = createdPeriod;
+    console.log({ id, processingTypeId, machineId, date, fieldId });
+
+    const createdProcessing = await this.processingService.create(
+      id,
+      processingTypeId,
+      machineId,
+      date,
+    );
+    console.log(createdProcessing);
     return { id, cropId, fieldId, created, updated, deleted };
   }
 

@@ -8,4 +8,15 @@ export class CreateGrowingPeriodDto {
   @IsUUID()
   @IsNotEmpty()
   cropId: string;
+
+  @IsUUID()
+  @IsNotEmpty()
+  machineId: string;
+
+  @IsUUID()
+  @IsNotEmpty()
+  processingTypeId: string;
+
+  @IsNotEmpty()
+  date: Date;
 }

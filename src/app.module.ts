@@ -20,7 +20,6 @@ import { AuthGuard } from './guards/auth.guard';
 import { IsUniqueConstraint } from './unique/validator';
 import { UniqueModule } from './unique/unique.module';
 import { GlobalExceptionFilter } from 'HttpExceptionFilter';
-
 @Module({
   imports: [
     TypeOrmModule.forRoot(dataSourceOptions),

@@ -68,6 +68,6 @@ export class SoilService {
     }
 
     await this.soilRepository.softRemove(soil);
-    return { success: true, message: id };
+    return id;
   }
 }
