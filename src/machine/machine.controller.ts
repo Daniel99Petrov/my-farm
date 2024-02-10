@@ -35,6 +35,11 @@ export class MachineController {
   async findAllByFarm(@Param('farmId') farmId: string): Promise<Machine[]> {
     return this.machineService.findAllByCondition({ farmId });
   }
+  @Get('by-field/:fieldId')
+  async findAllByField(@Param('fieldId') fieldId: string): Promise<Machine[]> {
+    const machines = this.machineService.findAllByField(fieldId);
+    return machines;
+  }
   @Get('by-growing-period/:growingPeriodId')
   async findAllByGrowingPeriod(
     @Param('growingPeriodId') growingPeriodId: string,

@@ -26,8 +26,8 @@ export class UserController {
 
   @Public()
   @Post('/signup')
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.authService.signup(
+  async create(@Body() createUserDto: CreateUserDto) {
+    return await this.authService.signup(
       createUserDto.email,
       createUserDto.username,
       createUserDto.password,
@@ -36,18 +36,21 @@ export class UserController {
 
   @Public()
   @Post('/signin')
-  signIn(@Body() signInDto: SignInDto) {
-    return this.authService.signIn(signInDto.username, signInDto.password);
+  async signIn(@Body() signInDto: SignInDto) {
+    return await this.authService.signIn(
+      signInDto.username,
+      signInDto.password,
+    );
   }
 
   @Roles(UserRoles.OWNER)
   @Delete(':id/permanent')
-  removePermanent(@Param('id', ParseUUIDPipe) id: string) {
-    return this.userService.removePermanent(id);
+  async removePermanent(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.userService.removePermanent(id);
   }
   @Roles(UserRoles.OWNER)
   @Delete(':id')
-  removeSoft(@Param('id', ParseUUIDPipe) id: string) {
-    return this.userService.removeSoft(id);
+  async removeSoft(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.userService.removeSoft(id);
   }
 }

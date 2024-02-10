@@ -17,7 +17,11 @@ export class FieldService {
   ) {}
 
   async findAll() {
-    return await this.fieldRepository.find();
+    return await this.fieldRepository.find({
+      order: {
+        created: 'DESC',
+      },
+    });
   }
 
   async findOne(id: string) {

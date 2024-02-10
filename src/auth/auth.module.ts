@@ -13,7 +13,7 @@ import { User } from 'src/user/entities/user.entity';
     JwtModule.register({
       global: true,
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '1000s' },
+      signOptions: { expiresIn: '8h' },
     }),
   ],
   controllers: [UserController],

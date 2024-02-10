@@ -31,8 +31,15 @@ export class AuthService {
       throw new BadRequestException('bad password');
     }
     const payload = { sub: user.id, username: user.username, role: user.role };
+    const partialUser = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    };
     return {
       access_token: await this.jwtService.signAsync(payload),
+      user: partialUser,
     };
   }
 

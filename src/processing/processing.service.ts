@@ -33,6 +33,9 @@ export class ProcessingService {
     if (!condition) return null;
     const processings = await this.processingRepository.find({
       where: condition,
+      order: {
+        date: 'DESC',
+      },
     });
     return processings;
   }
@@ -49,7 +52,6 @@ export class ProcessingService {
       .where('gp.id = :growingPeriodId', { growingPeriodId })
       .select('f.farmId', 'farmId')
       .getRawOne();
-    console.log(growingPeriodFarmId);
 
     const machineFarmId = await this.entityManager
       .getRepository(Machine)
@@ -57,7 +59,6 @@ export class ProcessingService {
       .where('machine.id = :machineId', { machineId })
       .select('machine.farmId', 'farmId')
       .getRawOne();
-    console.log(machineFarmId);
 
     if (machineFarmId.farmId !== growingPeriodFarmId.farmId) {
       throw new BadRequestException(

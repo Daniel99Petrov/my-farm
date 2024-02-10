@@ -10,6 +10,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { FarmService } from 'src/farm/farm.service';
 import { ProcessingService } from 'src/processing/processing.service';
 import { GrowingPeriod } from 'src/growing-period/entities/growing-period.entity';
+import { Field } from 'src/field/entities/field.entity';
 
 @Injectable()
 export class MachineService {
@@ -32,6 +33,19 @@ export class MachineService {
     return fields;
   }
 
+  async findAllByField(fieldId: string) {
+    if (!fieldId) return null;
+    const fieldFarmId = await this.entityManager
+      .getRepository(Field)
+      .createQueryBuilder('field')
+      .where('field.id = :fieldId', { fieldId })
+      .select('field.farmId', 'farmId')
+      .getRawOne();
+    const farmId = fieldFarmId.farmId;
+
+    const machines = this.findAllByCondition({ farmId });
+    return machines;
+  }
   async findAllByGrowingPeriod(growingPeriodId: string) {
     if (!growingPeriodId) return null;
     const growingPeriodFarmId = await this.entityManager
@@ -42,7 +56,6 @@ export class MachineService {
       .select('f.farmId', 'farmId')
       .getRawOne();
     const farmId = growingPeriodFarmId.farmId;
-    console.log(farmId);
 
     const machines = this.findAllByCondition({ farmId });
     return machines;
