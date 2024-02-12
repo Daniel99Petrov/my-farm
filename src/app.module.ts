@@ -34,7 +34,6 @@ import { GlobalExceptionFilter } from 'HttpExceptionFilter';
     SoilModule,
     UserModule,
     AuthModule,
-    // ReportModule,
     UniqueModule,
   ],
   controllers: [AppController],

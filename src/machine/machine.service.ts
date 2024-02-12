@@ -132,7 +132,7 @@ export class MachineService {
         'You have processings with this machine in current farm. Delete the processings or just create new machine',
       );
     }
-    Object.assign(machine, farmId);
+    machine.farmId = farmId;
     return await this.machineRepository.save(machine);
   }
 

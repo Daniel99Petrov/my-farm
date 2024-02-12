@@ -4,16 +4,12 @@ import { UpdateFieldDto } from './dto/update-field.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Field } from './entities/field.entity';
 import { Repository } from 'typeorm';
-// import { FarmService } from 'src/farm/farm.service';
-// import { SoilService } from 'src/soil/soil.service';
 
 @Injectable()
 export class FieldService {
   constructor(
     @InjectRepository(Field)
     private readonly fieldRepository: Repository<Field>,
-    // private readonly farmService: FarmService,
-    // private readonly soilService: SoilService,
   ) {}
 
   async findAll() {
@@ -51,17 +47,6 @@ export class FieldService {
     farmId: string,
     soilId: string,
   ) {
-    // const farmExists = await this.farmService.exists(farmId);
-    // if (!farmExists) {
-    //   throw new NotFoundException(`Farm with ID ${farmId} not found`);
-    // }
-
-    // const soilExists = await this.soilService.exists(soilId);
-    // if (!soilExists) {
-    //   throw new NotFoundException(`Soil with ID ${soilId} not found`);
-    // }
-
-    // without the checks, soft deleted could be chosen
     const field = this.fieldRepository.create({
       name,
       borders,

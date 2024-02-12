@@ -49,7 +49,6 @@ export class AuthService {
     if (userByEmail) {
       throw new BadRequestException('email in use');
     }
-    // TODO rename at the end
     const userByUsername = await this.userService.findByUsername(username);
     if (userByUsername) {
       throw new BadRequestException('username in use');
